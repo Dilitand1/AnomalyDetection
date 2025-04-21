@@ -1,5 +1,7 @@
 package org.example;
 
+import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
+import org.datavec.api.split.FileSplit;
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.*;
@@ -18,6 +20,7 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +85,7 @@ public class AutoencoderAnomalyDetection {
     }
 
     // Подготовка данных в скользящих окнах
-    private static DataSetIterator prepareDataset(INDArray timeSeries, int windowSize) {
+    static DataSetIterator prepareDataset(INDArray timeSeries, int windowSize) {
         List<DataSet> dataSets = new ArrayList<>();
 
         for (int i = 0; i < timeSeries.length() - windowSize; i++) {
@@ -162,8 +165,8 @@ public class AutoencoderAnomalyDetection {
         System.out.println("Обучение завершено");
     }
 
-    private static void detectAnomalies(ComputationGraph vae, INDArray timeSeries,
-                                        int windowSize, NormalizerMinMaxScaler normalizer) {
+    static void detectAnomalies(ComputationGraph vae, INDArray timeSeries,
+                                int windowSize, NormalizerMinMaxScaler normalizer) {
         List<Double> reconstructionErrors = new ArrayList<>();
         List<Integer> anomalyPositions = new ArrayList<>();
 
