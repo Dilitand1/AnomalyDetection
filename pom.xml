@@ -34,6 +34,13 @@
             <artifactId>datavec-api</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.8</version>
+        </dependency>
+
     </dependencies>
 
 </project>

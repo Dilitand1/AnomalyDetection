@@ -265,6 +265,4 @@ public class VAEAnomalyDetection {
         return timeSeries;
     }
 
-    // Остальные методы (prepareDataset, createVAE, trainVAE, detectAnomalies)
-    // остаются без изменений
 }
