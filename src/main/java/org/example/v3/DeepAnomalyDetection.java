@@ -65,24 +65,40 @@ public class DeepAnomalyDetection {
 
             DataSet dataSet = new DataSet(input, input); // Autoencoder: input = output
 
-            // Конфигурация автоэнкодера
-            MultiLayerNetwork model = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
-                    .seed(123)
-                    .updater(new Adam(0.01))
-                    .weightInit(WeightInit.XAVIER)
-                    .list()
-                    .layer(new DenseLayer.Builder()
-                            .nIn(1)
-                            .nOut(3) // Размер скрытого слоя
-                            .activation(Activation.RELU)
-                            .build())
-                    .layer(new OutputLayer.Builder()
-                            .nIn(3)
-                            .nOut(1)
-                            .lossFunction(LossFunctions.LossFunction.MSE)
-                            .activation(Activation.IDENTITY)
-                            .build())
-                    .build());
+            MultiLayerNetwork model = new MultiLayerNetwork(
+                    new NeuralNetConfiguration.Builder()
+                            // 1. Инициализация генератора случайных чисел для воспроизводимости
+                            .seed(123)
+
+                            // 2. Настройка оптимизатора (Adam с learning rate = 0.01)
+                            .updater(new Adam(0.01))
+
+                            // 3. Метод инициализации весов (Xavier для равномерного распределения)
+                            .weightInit(WeightInit.XAVIER)
+
+                            // 4. Начало описания слоев сети
+                            .list()
+
+                            // 5. Первый скрытый слой (энкодер)
+                            .layer(new DenseLayer.Builder()
+                                    .nIn(1)                // 5.1. 1 входной нейрон (значение)
+                                    .nOut(3)              // 5.2. 3 нейрона в слое (сжатие)
+                                    .activation(Activation.RELU) // 5.3. Функция активации
+                                    .build())
+
+                            // 6. Выходной слой (декодер)
+                            .layer(new OutputLayer.Builder()
+                                    .nIn(3)                // 6.1. 3 входа (из предыдущего слоя)
+                                    .nOut(1)               // 6.2. 1 выход (реконструкция значения)
+                                    .lossFunction(LossFunctions.LossFunction.MSE) // 6.3. Функция потерь
+                                    .activation(Activation.IDENTITY) // 6.4. Линейная активация
+                                    .build())
+
+                            // 7. Финальная сборка конфигурации
+                            .build()
+            );
+
+            // 8. Инициализация весов сети
             model.init();
 
             // Обучение модели
