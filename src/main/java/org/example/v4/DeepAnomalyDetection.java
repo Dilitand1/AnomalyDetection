@@ -9,6 +9,8 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
+import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerSerializer;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -106,7 +108,7 @@ public class DeepAnomalyDetection {
 
         ModelWrapper wrapper = new ModelWrapper();
         File modelFile = new File(MODEL_DIR + name + ".zip");
-        File propsFile = new File(MODEL_DIR + name + ".props");
+        File propsFile = new File(MODEL_DIR + name + ".norm");
 
         try {
             if (modelFile.exists() && propsFile.exists()) {
@@ -135,7 +137,7 @@ public class DeepAnomalyDetection {
 
             // Загружаем параметры нормализации
             Properties props = new Properties();
-            try (InputStream in = new FileInputStream(MODEL_DIR + name + ".props")) {
+            try (InputStream in = new FileInputStream(MODEL_DIR + name + ".norm")) {
                 props.load(in);
                 wrapper.minValue = Double.parseDouble(props.getProperty("min"));
                 wrapper.maxValue = Double.parseDouble(props.getProperty("max"));
@@ -182,6 +184,23 @@ public class DeepAnomalyDetection {
         return model;
     }
 
+    private static void saveModelAndParams(String name, ModelWrapper wrapper) {
+        try {
+            // Сохраняем модель
+            ModelSerializer.writeModel(wrapper.model, MODEL_DIR + name + ".zip", true);
+
+            // Создаем и сохраняем нормализатор
+            NormalizerMinMaxScaler normalizer = new NormalizerMinMaxScaler(wrapper.minValue, wrapper.maxValue);
+            normalizer.setFeatureStats(wrapper.model.input(), wrapper.model.input());
+
+            NormalizerSerializer serializer = NormalizerSerializer.getDefault();
+            serializer.write(normalizer, MODEL_DIR + name + ".norm");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private static void trainAndSaveModel(String name, List<Double> values, ModelWrapper wrapper) {
         // Нормализация данных
         List<Double> normalized = normalize(values, wrapper.minValue, wrapper.maxValue);
@@ -199,15 +218,16 @@ public class DeepAnomalyDetection {
         }
 
         // Сохранение модели и параметров нормализации
-        try {
-            ModelSerializer.writeModel(wrapper.model, MODEL_DIR + name + ".zip", true);
-            ModelSerializer.addNormalizerToModel(
-                    new File(MODEL_DIR + name + ".zip"),
-                    new MinMaxNormalizer(wrapper.minValue, wrapper.maxValue)
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        saveModelAndParams(name, wrapper);
+//        try {
+//            ModelSerializer.writeModel(wrapper.model, MODEL_DIR + name + ".zip", true);
+//            ModelSerializer.addNormalizerToModel(
+//                    new File(MODEL_DIR + name + ".zip"),
+//                    new MinMaxNormalizer(wrapper.minValue, wrapper.maxValue)
+//            );
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private static List<Double> normalize(List<Double> data, double min, double max) {

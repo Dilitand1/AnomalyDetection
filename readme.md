@@ -1,4 +1,9 @@
-DeepAnomalyDetection
+Рабочие сервисы:
+org.example.v4
+org.example.v3
+org.example.noai
+VAEAnomalyDetection
+
 
 Вот пошаговое объяснение каждой строки в блоке конфигурации автоэнкодера:
 

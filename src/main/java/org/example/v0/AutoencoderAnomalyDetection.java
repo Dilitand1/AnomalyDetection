@@ -1,4 +1,4 @@
-package org.example;
+package org.example.v0;
 
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;

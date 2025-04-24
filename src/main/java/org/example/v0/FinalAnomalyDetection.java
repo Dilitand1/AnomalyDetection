@@ -1,4 +1,4 @@
-package org.example;
+package org.example.v0;
 
 import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.layers.*;

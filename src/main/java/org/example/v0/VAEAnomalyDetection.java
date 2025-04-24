@@ -1,4 +1,4 @@
-package org.example;
+package org.example.v0;
 
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
@@ -10,6 +10,7 @@ import org.deeplearning4j.nn.conf.layers.CenterLossOutputLayer;
 import org.deeplearning4j.nn.conf.layers.variational.GaussianReconstructionDistribution;
 import org.deeplearning4j.nn.conf.layers.variational.VariationalAutoencoder;
 import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -23,20 +24,16 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class VAEAnomalyDetection2fields {
+public class VAEAnomalyDetection {
 
     public static void main(String[] args) {
         try {
             // 1. Загрузка данных
-            String filePath = "C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithnames.csv";
-            var timeSeriesMap = loadTimeSeriesWithNames(filePath);
-            INDArray timeSeriesData = convertToINDArray(timeSeriesMap);
+            String filePath = "C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseries.csv";
+            INDArray timeSeriesData = loadTimeSeriesFromCSV(filePath);
 
             // 2. Подготовка датасета
             int windowSize = 1;
@@ -88,66 +85,6 @@ public class VAEAnomalyDetection2fields {
             e.printStackTrace();
         }
     }
-
-    public static class NamedTimeSeries {
-        private List<String> names;
-        private INDArray values;
-
-        // Конструкторы, геттеры и сеттеры
-    }
-
-    public static Map<String, List<Double>> loadMultiValueSeries(String filePath) throws Exception {
-        CSVRecordReader recordReader = new CSVRecordReader(0, ',');
-        recordReader.initialize(new FileSplit(new File(filePath)));
-
-        Map<String, List<Double>> multiSeries = new HashMap<>();
-
-        while (recordReader.hasNext()) {
-            List<Writable> fields  = recordReader.next();
-
-            if (fields.size() >= 2) {
-                String name = fields.get(0).toString();
-                double value = fields.get(1).toDouble();
-
-                multiSeries.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
-            }
-        }
-
-        return multiSeries;
-    }
-
-    public static Map<String, Double> loadTimeSeriesWithNames(String filePath) throws Exception {
-//        CSVRecordReader recordReader = new CSVRecordReader(0, ','); // Пропускаем 0 строк заголовка
-        CSVRecordReader recordReader = new CSVRecordReader(0, '\t'); // Пропускаем 0 строк заголовка
-        recordReader.initialize(new FileSplit(new File(filePath)));
-
-        Map<String, Double> timeSeriesMap = new HashMap<>();
-
-        while (recordReader.hasNext()) {
-            List<Writable> fields = recordReader.next();
-
-            if (fields.size() >= 2) {
-                String name = fields.get(0).toString(); // Первое поле - название
-                double value = fields.get(1).toDouble(); // Второе поле - значение
-                timeSeriesMap.put(name, value);
-            }
-        }
-
-        return timeSeriesMap;
-    }
-
-    public static INDArray convertToINDArray(Map<String, Double> timeSeriesMap) {
-        int size = timeSeriesMap.size();
-        INDArray array = Nd4j.zeros(size);
-
-        int i = 0;
-        for (Double value : timeSeriesMap.values()) {
-            array.putScalar(i++, value);
-        }
-
-        return array;
-    }
-
 
     static void detectAnomalies(ComputationGraph vae, INDArray timeSeries,
                                 int windowSize, NormalizerMinMaxScaler normalizer) {
@@ -328,6 +265,4 @@ public class VAEAnomalyDetection2fields {
         return timeSeries;
     }
 
-    // Остальные методы (prepareDataset, createVAE, trainVAE, detectAnomalies)
-    // остаются без изменений
 }
