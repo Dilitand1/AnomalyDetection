@@ -23,15 +23,15 @@ public class ServiceAnomalyDetectionV6 {
         Map<String, List<Double>> subServices = new HashMap<>(); // Key: sub-service name
     }
 
-    public static void main(String[] args) {
-        trainAndSaveModels();
-        Map<String, ServiceData> services = readData("C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithClusters.csv");
-        var data = services.get("1cluster");
-
-        INDArray matrix = convertToMatrix(data);
-
-        detectAnomalies("1cluster", matrix).forEach(t -> System.out.println(t + "\n"));
-    }
+//    public static void main(String[] args) {
+//        trainAndSaveModels();
+//        Map<String, ServiceData> services = readData("C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithClusters.csv");
+//        var data = services.get("1cluster");
+//
+//        INDArray matrix = convertToMatrix(data);
+//
+//        detectAnomalies("1cluster", matrix).forEach(t -> System.out.println(t + "\n"));
+//    }
 
 
     public static void trainAndSaveModels() {
@@ -91,28 +91,28 @@ public class ServiceAnomalyDetectionV6 {
         }
     }
 
-//    public static void main(String[] args) {
-//        Map<String, ServiceData> services = readData("C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithClusters.csv");
-//
-//        for (String serviceName : services.keySet()) {
-//            ServiceData data = services.get(serviceName);
-//            INDArray matrix = convertToMatrix(data);
-//
-//            DataNormalizer normalizer = new DataNormalizer(matrix);
-//            INDArray normalized = normalizer.normalize(matrix);
-//
-//            MultiLayerNetwork model = createModel(matrix.columns());
-//            model.init();
-//            model.fit(new DataSet(normalized, normalized));
-//
-//            INDArray reconstructions = model.output(normalized);
-//            INDArray diff = reconstructions.sub(normalized);
-//            INDArray errors = diff.mul(diff); // [samples x features]
-//
-//            List<String> anomalies = findAnomalies(errors, matrix, data.subServices.keySet().stream().toList());
-//            System.out.println("Аномалии в " + serviceName + ": " + anomalies);
-//        }
-//    }
+    public static void main(String[] args) {
+        Map<String, ServiceData> services = readData("C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithClusters.csv");
+
+        for (String serviceName : services.keySet()) {
+            ServiceData data = services.get(serviceName);
+            INDArray matrix = convertToMatrix(data);
+
+            DataNormalizer normalizer = new DataNormalizer(matrix);
+            INDArray normalized = normalizer.normalize(matrix);
+
+            MultiLayerNetwork model = createModel(matrix.columns());
+            model.init();
+            model.fit(new DataSet(normalized, normalized));
+
+            INDArray reconstructions = model.output(normalized);
+            INDArray diff = reconstructions.sub(normalized);
+            INDArray errors = diff.mul(diff); // [samples x features]
+
+            List<String> anomalies = findAnomalies(errors, matrix, data.subServices.keySet().stream().toList());
+            System.out.println("Аномалии в " + serviceName + ": " + anomalies);
+        }
+    }
 
     // 1. Чтение данных
     private static Map<String, ServiceData> readData(String filename) {
