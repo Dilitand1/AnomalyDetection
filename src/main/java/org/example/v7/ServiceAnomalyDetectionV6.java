@@ -1,4 +1,4 @@
-package org.example.v6;
+package org.example.v7;
 
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -26,11 +26,23 @@ public class ServiceAnomalyDetectionV6 {
     public static void main(String[] args) {
 //        trainAndSaveModels();
         Map<String, ServiceData> services = readData("C:\\Users\\Dilit\\IdeaProjects\\DeepLearning4j\\src\\main\\resources\\timeseriesWithClusters.csv");
-        var data = services.get("2cluster");
+        var data = services.get("1cluster");
+
+
+
+//        try {
+//            validateData(data.subServices);
+//        } catch (IllegalArgumentException e) {
+//            // Шаг 2: Выравнивание данных
+//            alignDataToMinSize(data.subServices);
+//        }
+
+        // Шаг 4: Заполнение пропусков (опционально)
+        fillMissingValues(data.subServices);
 
         INDArray matrix = convertToMatrix(data.subServices);
 
-        detectAnomalies("2cluster", matrix).forEach(t -> System.out.println(t + "\n"));
+        detectAnomalies("1cluster", matrix).forEach(t -> System.out.println(t + "\n"));
     }
 
 
@@ -282,10 +294,14 @@ public class ServiceAnomalyDetectionV6 {
 
         for (int row = 0; row < errors.rows(); row++) {
             for (int col = 0; col < errors.columns(); col++) {
-                if (errors.getDouble(row, col) > threshold) {
-                    String service = subServiceNames.get(col);
-                    double value = originalData.getDouble(row, col);
-                    anomalies.add(String.format("%s: %.6f", service, value));
+                try {
+                    if (errors.getDouble(row, col) > threshold) {
+                        String service = subServiceNames.get(col);
+                        double value = originalData.getDouble(row, col);
+                        anomalies.add(String.format("%s: %.6f", service, value));
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         }
@@ -303,6 +319,6 @@ public class ServiceAnomalyDetectionV6 {
 //        INDArray flattened = errors.ravel();
 //        double[] flatErrors = flattened.toDoubleVector();
 //        Arrays.sort(flatErrors);
-//        return flatErrors[(int) (flatErrors.length * 0.95)];
+//        return flatErrors[(int) (flatErrors.length * 0.97)];
 //    }
 }
